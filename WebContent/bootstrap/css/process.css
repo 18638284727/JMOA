@@ -1,0 +1,64 @@
+.ywsq{
+	height: 45px;
+	background-color: #eaedf2;
+	text-align: center;
+	padding-top: 5px;
+	margin-top: 10px;
+}
+.sou{
+	margin-left: -10px;
+}
+.sou1{
+	margin-left: -10px;
+	margin-top: -30px;
+	margin-bottom: 20px;
+}
+.sso{
+	width: 300px;
+	height: 35px;
+	padding-left: 5px;
+	margin-left: 26px;
+	margin-bottom: 10px;
+	color:#999;
+	border: 1px solid #dddddd;
+}
+.input-group1{
+	padding-left: 75px;
+	margin-top: 30px;
+	font-family: '微软雅黑';
+	font-size: 14px;
+}
+.input-group1-1{
+	height: 90px;
+	padding-left: 75px;
+	margin-top: 30px;
+	font-family: '微软雅黑';
+	font-size: 14px;
+	background-color: #fefff8;
+	
+}
+.input-group1-11{
+	height: 90px;
+	padding-left: 75px;
+	margin-top: 30px;
+	margin-left: -75px;
+	font-family: '微软雅黑';
+	font-size: 14px;
+	background-color: #f4f6f8;
+}
+.input-group2{
+	margin-left: 75px;
+	margin-top: 30px;
+	font-family: '微软雅黑';
+	font-size: 14px;
+}
+.input-group2-1{
+	margin-left: 75px;
+	margin-top: 10px;
+	font-family: '微软雅黑';
+	font-size: 14px;
+}
+.input-group2-1 span{
+	font-weight:bold;
+}
+

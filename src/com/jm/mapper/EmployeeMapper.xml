@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.dao.EmployeeDao">
+	
+	<cache></cache>
+	
+	<resultMap type="Employee" id="EmployeeMap">
+		<id column="E_ID" property="eId"/>
+		<result column="USERNAME" property="username"/>
+		<result column="PASSWORD" property="password"/>
+		<result column="E_NAME" property="eName"/>
+		<result column="E_SEX" property="eSex"/>
+		<result column="E_BIRTH" property="eBirth"/>
+		<result column="E_AGE" property="eAge"/>
+		<result column="E_EDUCATION" property="eEducation"/>
+		<result column="E_ORIGIN" property="eOrigin"/>
+		<result column="E_IDCARD" property="eIdcard"/>
+		<result column="E_PHONE" property="ePhone"/>
+		<result column="E_EMAIL" property="eEmail"/>
+		<result column="E_ADDRESS" property="eAddress"/>
+		<result column="E_MANAGER" property="eManager"/>
+		<result column="E_LEADER" property="eLeader"/>
+		<result column="E_REGION" property="eRegion"/>
+		<result column="E_HIREDATE" property="eHiredate"/>
+		<result column="E_FORMAL_DATE" property="eFormalDate"/>
+		<result column="E_IMAGE" property="eImage"/>
+		<association column="N_ID" property="nation" select="com.jm.dao.NationDao.getNationById"></association>
+		<association column="D_ID" property="dept" select="com.jm.dao.DepartmentDao.getDepartmentByDid"></association>
+		<association column="S_ID" property="state" select="com.jm.dao.StateDao.getStateById"></association>
+	</resultMap>
+	
+	<!-- 验证用户名 -->
+	<select id="checkUsername" resultType="Integer">
+		SELECT COUNT(E_ID) FROM EMPLOYEE WHERE USERNAME = #{username}
+	</select>
+	
+	<!-- 入职添加信息 -->
+	<insert id="entry" parameterType="Employee">
+		INSERT IGNORE INTO EMPLOYEE(E_ID,USERNAME,PASSWORD) VALUES(#{eId},#{username},#{password});
+	</insert>
+	
+	<!-- 根据职员编号返回职员记录 -->
+	<select id="getEmployeeByEid" resultMap="EmployeeMap">
+		SELECT * FROM EMPLOYEE WHERE E_ID = #{eId}
+	</select>
+	
+	<!-- 根据部门编号查询该部门所有的职员 -->
+	<select id="getEmployeeByDid" resultType="Employee">
+		SELECT * FROM EMPLOYEE WHERE D_ID = #{dId}
+	</select>
+</mapper>

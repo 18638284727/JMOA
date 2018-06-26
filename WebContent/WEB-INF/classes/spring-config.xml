@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd">
+
+	<!-- 导入数据库资源文件 -->
+	<context:property-placeholder location="classpath:db.properties" />
+
+	<!-- 自动扫描 -->
+	<context:component-scan base-package="com.jm">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+		<context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice" />
+	</context:component-scan>
+
+	<!-- 数据源 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${jdbc.driver}"></property>
+		<property name="jdbcUrl" value="${jdbc.url}"></property>
+		<property name="user" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+		<property name="initialPoolSize" value="5"></property>
+		<property name="maxPoolSize" value="10"></property>
+	</bean>
+
+	<!-- sqlSessionFactory -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="configLocation" value="classpath:Configuration.xml"></property>
+		<property name="mapperLocations" value="classpath:com/jm/mapper/*.xml"></property>
+	</bean>
+
+	<!-- jdbcTemplate -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<!-- 配置事物 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<!-- 扫描接口 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+		<property name="basePackage" value="com.jm.dao"></property>
+	</bean>
+
+	<!-- 开启事物注解，动态代理:proxy-target-class="true" -->
+	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" />
+
+	<!-- activiti配置 -->
+	<bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration">
+		<property name="transactionManager" ref="transactionManager"></property>
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="databaseSchemaUpdate" value="true"></property>
+		<property name="activityFontName" value="宋体" />
+		<property name="labelFontName" value="宋体" />
+		<property name="annotationFontName" value="宋体" />
+		<!-- 模型的主键生成策略 -->
+		<!-- <property name="idGenerator" ref="uuidGenerator"></property> -->
+		<!-- 定时任务的开启 -->
+		<property name="jobExecutorActivate" value="true"></property>
+		<!-- 邮件发送 -->
+		<property name="mailServerHost" value="smtp.qq.com" />
+        <property name="mailServerPort" value="465"/>
+		<property name="mailServerDefaultFrom" value="373588809@qq.com"></property> <!-- activiti没有设置邮箱的时候，选择此选项 -->
+		<property name="mailServerUsername" value="373588809@qq.com"></property> <!-- 发送者 -->
+		<property name="mailServerPassword" value="bhqidhqwxptobhdb"></property>
+		<property name="mailServerUseSSL" value="true" />
+	</bean>
+
+	<!-- processEngine -->
+	<bean id="processEngine" class="org.activiti.spring.ProcessEngineFactoryBean">
+		<property name="processEngineConfiguration" ref="processEngineConfiguration"></property>
+	</bean>
+
+	<!-- ObjectMapper: JSON,XML,POJO转换 -->
+	<bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper" />
+
+	<!-- 引擎内部提供的UUID生成器，依赖fastxml的java-uuid-generator.jar模块 -->
+	<bean id="uuidGenerator" class="org.activiti.engine.impl.persistence.StrongUuidGenerator" />
+
+	<!-- activiti的七大服务接口 -->
+	<bean id="repositoryService" factory-bean="processEngine" factory-method="getRepositoryService" />
+	<bean id="runtimeService" factory-bean="processEngine" factory-method="getRuntimeService" />
+	<bean id="taskService" factory-bean="processEngine" factory-method="getTaskService" />
+	<bean id="formService" factory-bean="processEngine" factory-method="getFormService" />
+	<bean id="historyService" factory-bean="processEngine" factory-method="getHistoryService" />
+	<bean id="managementService" factory-bean="processEngine" factory-method="getManagementService" />
+	<bean id="identityService" factory-bean="processEngine" factory-method="getIdentityService" />
+
+	<!-- SecurityManager -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="shiroRealm"></property>
+		<!-- <property name="sessionManager" ref="sessionManager"></property> -->
+		<property name="cacheManager" ref="cacheManager" />
+		<property name="rememberMeManager" ref="rememberMeManager"></property>
+	</bean>
+
+	<!-- cacheManager -->
+	<bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+		<property name="cacheManagerConfigFile" value="classpath:ehcache.xml"></property>
+	</bean>
+
+	<!-- realm -->
+	<bean id="shiroRealm" class="com.jm.realm.shiroRealm">
+		<property name="credentialsMatcher" ref="countHashedCredentialsMatcher"></property>
+		<property name="cachingEnabled" value="true"/>  
+	    <property name="authenticationCachingEnabled" value="true"/>  
+	    <property name="authenticationCacheName" value="authenticationCache"/>  
+	    <property name="authorizationCachingEnabled" value="true"/>  
+	    <property name="authorizationCacheName" value="authorizationCache"/> 
+	</bean>
+	
+	<bean id="countHashedCredentialsMatcher" class="com.jm.realm.CountHashedCredentialsMatcher">
+		<constructor-arg ref="cacheManager"></constructor-arg>
+		<property name="hashAlgorithmName" value="MD5"></property>
+		<property name="hashIterations" value="1024"></property>
+		<property name="storedCredentialsHexEncoded" value="true" /> 
+	</bean>
+
+	<!-- 生命周期的bean的处理器 -->
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"></bean>
+
+	<!-- 
+		shiro注解,添加Service层,如果需要在Controller层添加,则需要在spring-mvc.xml文件中配置如下两个bean,
+		DefaultAdvisorAutoProxyCreator 需要依赖于 LifecycleBeanPostProcessor 这个bean,所以还需要添
+		加 LifecycleBeanPostProcessor 该bean
+	-->
+	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor">
+		<property name="proxyTargetClass" value="true" />
+	</bean>
+
+	<bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+		<property name="securityManager" ref="securityManager"></property>
+	</bean>
+
+	<bean class="org.apache.shiro.spring.remoting.SecureRemoteInvocationExecutor">
+		<property name="securityManager" ref="securityManager"></property>
+	</bean>
+
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager"></property>
+		<property name="loginUrl" value="/login.jsp"></property>
+		<property name="successUrl" value="/home.jsp"></property>
+		<property name="unauthorizedUrl" value="login.jsp"></property>
+		<property name="filterChainDefinitionMap" ref="filterChainDefinitionMap"></property>
+		<property name="filters">
+			<map>
+				<entry key="rememberMe" value-ref="rememberMeSessionFileter"/>
+			</map>
+		</property>
+		<!-- <property name="filterChainDefinitions"> -->
+		<!-- <value> -->
+		<!-- 访问路径 -->
+		<!-- /login.jsp = anon 任意都可以访问login.jsp -->
+		<!-- /employee/login = anon 任意都可以访问login方法 -->
+		<!-- /employee/checkUsername = anon 验证用户名 -->
+		<!-- /employee/logout = logout 登出 -->
+		<!-- 需要授权才能访问的链接 -->
+		<!-- /error.jsp = roles[user] -->
+		<!-- 静态资源 -->
+		<!-- /api/** = anon -->
+		<!-- /assets/** = anon -->
+		<!-- /bootstrap/** = anon -->
+		<!-- /diagram-viewer/** = anon -->
+		<!-- /editor-app/** = anon -->
+		<!-- /explorer/** = anon -->
+		<!-- /Font-Awesome-3.2.1/** = anon -->
+		<!-- /images/** = anon -->
+		<!-- /js/** = anon -->
+		<!-- /nav/** = anon -->
+		<!-- /plugin/** = anon -->
+		<!-- /views/** = anon -->
+		<!-- 除上述外的全部拦截 -->
+		<!-- /** = authc -->
+		<!-- </value> -->
+		<!-- </property> -->
+	</bean>
+
+	<!-- 自定义filter拦截规则 -->
+	<bean id="rememberMeSessionFileter" class="com.jm.filter.RememberMeSessionFileter">
+		<property name="cache" ref="cacheManager"></property>
+	</bean>
+
+	<!-- 配置bean，实际上是一个map，通过实例工厂方法的方式 -->
+	<bean id="filterChainDefinitionMap" factory-bean="filterChainDefinitionMapBuilder"
+		factory-method="builderFilterChainDefinitionMapBuilder"></bean>
+
+	<bean id="filterChainDefinitionMapBuilder" class="com.jm.factory.FilterChainDefinitionMapBuilder"></bean>
+	
+	<!-- spring:配置缓存 -->
+	<cache:annotation-driven cache-manager="cache"/>
+	
+	<bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+		<property name="configLocation" value="classpath:ehcache.xml"></property>
+		<property name="shared" value="true"></property>
+	</bean>
+	
+	<bean id="cache" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+		<property name="cacheManager" ref="ehcache"></property>
+	</bean>
+	
+	<!-- session -->
+	<!-- 会话ID生成器 -->
+	<bean id="sessionIdGenerator" class="org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator"></bean>
+	
+	<!-- Cookie模板 -->
+	<bean id="simpleCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+		<constructor-arg value="sessionid"/>
+		<property name="httpOnly" value="true"></property>
+		<property name="maxAge" value="-1"></property>
+	</bean>
+	
+	<!-- 
+		持久化方式: 
+		DefaultWebSessionManager,EnterpriseCacheSessionDAO 继承的父类都实现了 CacheManagerAware
+		所以查询时首先查询缓存,如果缓存当中没有则去数据库当中查询(CacheManagerAware 实现该接口,自动缓存)
+	-->
+	<bean id="sessionDao" class="com.jm.realm.SessionDao">
+		<property name="activeSessionsCacheName" value="shiro-activeSessionCache"/>
+        <property name="sessionIdGenerator" ref="sessionIdGenerator"/>
+	</bean>
+	
+	<!-- 调度器 -->
+	<bean id="quartzSessionValidationScheduler" class="org.apache.shiro.session.mgt.quartz.QuartzSessionValidationScheduler">
+        <property name="sessionValidationInterval" value="1800000"/>
+        <property name="sessionManager" ref="sessionManager"/>
+	</bean>
+	
+	<!-- 会话管理器 -->
+    <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+        <property name="globalSessionTimeout" value="1800000"/>
+        <property name="deleteInvalidSessions" value="true"/>
+        <property name="sessionValidationScheduler" ref="quartzSessionValidationScheduler"></property>
+        <property name="sessionValidationSchedulerEnabled" value="true"/>
+        <property name="sessionDAO" ref="sessionDao"/>
+        <property name="sessionListeners">
+        	<list>
+        		<ref bean="mySessionListener"/>
+        	</list>
+        </property>
+        <property name="sessionIdCookieEnabled" value="true"></property>
+        <property name="sessionIdCookie" ref="simpleCookie"></property>
+    </bean>
+	
+	<!-- 会话监听 -->
+	<bean id="mySessionListener" class="com.jm.listener.MySessionListener"></bean>
+	
+	<!-- rememberMe -->
+	<bean id="rememberMeCookie" class="org.apache.shiro.web.servlet.SimpleCookie">  
+	    <constructor-arg value="rememberMe"/>  
+	    <property name="httpOnly" value="true"/>  
+	    <property name="maxAge" value="604800"/><!-- 7天 -->
+	</bean> 
+	
+	<!-- rememberMe管理器 -->  
+	<bean id="rememberMeManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager">  
+	    <property name="cipherKey" value="#{T(org.apache.shiro.codec.Base64).decode('4AvVhmFLUs0KTA3Kprsdag==')}"/>  
+	    <property name="cookie" ref="rememberMeCookie"/>  
+	</bean>  
+	
+</beans>

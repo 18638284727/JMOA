@@ -1,0 +1,17 @@
+@charset "utf-8";
+.error1,.error2{
+	position: absolute;
+	display: block;
+	width:150px;
+	height:40px;
+	font-size:16px;
+	text-align:right;
+}
+.error1{
+	right:770px;
+	top:190px;
+}
+.error2{
+	right:770px;
+	top:405px;
+}

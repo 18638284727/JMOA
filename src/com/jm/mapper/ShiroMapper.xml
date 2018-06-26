@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.dao.ShiroDao">
+	
+	<cache></cache>
+	
+	<!-- 登录验证方法 -->
+	<select id="login" resultType="Employee">
+		SELECT
+			*
+		FROM EMPLOYEE 
+		WHERE USERNAME = #{username}
+	</select>
+	
+	<!-- 根据职员编号获取所有该职员的角色集合 -->
+	<select id="getRoleByEid" resultType="Role">
+		SELECT * FROM ROLE WHERE R_ID IN(SELECT R_ID FROM ROLE_EMPLOYEE WHERE E_ID = #{eId})
+	</select>
+	
+	<!-- 获取角色所拥有的操作 -->
+	<select id="getOperationByRid" resultType="String">
+		SELECT O_NAME FROM OPERATION WHERE O_ID IN(SELECT O_ID FROM ROLE_OPERATION WHERE R_ID = #{rId})
+	</select>
+	
+</mapper>

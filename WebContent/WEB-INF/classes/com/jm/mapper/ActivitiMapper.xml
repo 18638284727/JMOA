@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.dao.ActivitiDao">
+	
+	<!-- 获取模型条数 -->
+	<select id="countModel" resultType="Integer">
+		SELECT COUNT(0) FROM ACT_RE_MODEL
+	</select>
+	
+	<resultMap type="ByteArray" id="ByteArrayMap">
+		<result column="ID_" property="id"/>
+		<result column="REV_" property="rev"/>
+		<result column="NAME_" property="name"/>
+		<result column="DEPLOYMENT_ID_" property="deploymentId"/>
+		<result column="BYTES_" property="bytes"/>
+		<result column="GENERATED" property="generated"/>
+	</resultMap>
+	
+	<!-- 根据部署编号查询二进制表的记录 -->
+	<select id="getByteArrayByDeploymentId" resultMap="ByteArrayMap">
+		SELECT * FROM ACT_GE_BYTEARRAY WHERE DEPLOYMENT_ID_ = #{deploymentId}
+	</select>
+	
+	<!-- 根据部署编号修改流程定义的名称为指定模型编号的模型的名称 -->
+	<select id="updateProcessName" resultType="Integer">
+		UPDATE ACT_RE_PROCDEF SET NAME_ = (SELECT NAME_ FROM ACT_RE_MODEL WHERE ID_ = #{modelId}) WHERE DEPLOYMENT_ID_ = #{deploymentId}
+	</select>
+	
+	<!-- 获取流程定义条数 -->
+	<select id="countProcess" resultType="Integer">
+		SELECT COUNT(0) FROM ACT_RE_PROCDEF WHERE 1=1
+		<if test="name != null">
+			AND NAME_ = #{name}
+		</if>
+	</select>
+	
+	<!-- 根据处理人获取任务条数 -->
+	<select id="countTask" resultType="Integer">
+		SELECT COUNT(0) FROM ACT_RU_TASK WHERE ASSIGNEE_ = #{assignee}
+	</select>
+	
+	<!-- 获取所有的流程定义的名称 -->
+	<select id="getProcdefName" resultType="String">
+		SELECT DISTINCT NAME_ FROM `ACT_RE_PROCDEF`
+	</select>
+	
+	<resultMap type="ProcessModel" id="ProcessModelMap">
+		<id column="ID_" property="id"/>
+		<result column="NAME_" property="name"/>
+	</resultMap>
+	
+	<!-- 获取所有的流程定义 -->
+	<select id="getProcessModel" resultMap="ProcessModelMap">
+		SELECT DISTINCT ID_,NAME_ FROM `ACT_RE_PROCDEF`
+	</select>
+	
+	<update id="updateAssignee">
+		UPDATE ACT_RU_TASK SET ASSIGNEE_ = #{assignee} WHERE ID_ = #{taskId}
+	</update>
+	
+	<select id="getProdefIdByName" resultType="String">
+		SELECT ID_ FROM ACT_RE_PROCDEF WHERE NAME_ = #{name}
+	</select>
+	
+	<insert id="insertFollow">
+		INSERT IGNORE INTO follow VALUES(NULL, #{taskId}, #{eName});
+	</insert>
+	
+	<select id="checkFollowTask" resultType="Integer">
+		SELECT COUNT(F_ID) FROM FOLLOW WHERE TASK_ID = #{taskId}
+	</select>
+	
+	<delete id="deleteFollow">
+		DELETE FROM FOLLOW WHERE TASK_ID = #{taskId}
+	</delete>
+	
+	<select id="selectHisExecutionIdByTaskId" resultType="String">
+		SELECT EXECUTION_ID_ FROM ACT_HI_TASKINST WHERE ID_ = #{hisTaskId}
+	</select>
+	
+	<select id="selectExecutionIdByTaskId" resultType="String">
+		SELECT EXECUTION_ID_ FROM ACT_RU_TASK WHERE ID_ = #{hisTaskId}
+	</select>
+	
+	<delete id="deleteVariables">
+		DELETE FROM ACT_RU_VARIABLE WHERE EXECUTION_ID_ =#{executionId} AND TASK_ID_ IS NULL
+	</delete>
+	
+	<delete id="deleteHisVariables">
+		DELETE FROM ACT_HI_VARINST WHERE EXECUTION_ID_ =#{executionId} AND TASK_ID_ IS NULL
+	</delete>
+	
+	<delete id="deleteTaskInstance">
+		DELETE FROM ACT_RU_TASK WHERE ID_ = #{taskId}
+	</delete>
+</mapper>

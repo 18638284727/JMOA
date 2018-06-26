@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.dao.StateDao">
+	
+	<!-- 根据编号查询状态 -->
+	<select id="getStateById" resultType="State">
+		SELECT * FROM STATE WHERE S_ID = #{sId}
+	</select>
+	
+</mapper>

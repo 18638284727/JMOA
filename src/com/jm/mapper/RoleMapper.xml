@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.dao.RoleDao">
+	
+	<cache></cache>
+	
+	<!-- 拥有指定权限编号的所有角色集合 -->
+	<select id="getRoleByJid" resultType="String">
+		SELECT r_name FROM ROLE WHERE R_ID IN(SELECT R_ID FROM JURISDICTION_ROLE WHERE J_ID = #{jId})
+	</select>
+	
+</mapper>

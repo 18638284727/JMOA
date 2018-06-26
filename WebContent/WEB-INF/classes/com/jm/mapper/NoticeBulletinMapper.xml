@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.dao.NoticeBulletinDao">
+	
+	<resultMap type="NoticeBulletin" id="NoticeBulletinMap">
+		<id column="NB_ID" property="nbId"/>
+		<result column="NB_TITLE" property="nbTitle"/>
+		<result column="NB_CONTENT" property="nbContent"/>
+		<result column="NB_DATE" property="nbDate"/>
+		<association column="C_ID" property="company" select="com.jm.dao.CompanyDao.getCompanyById"></association>
+		<association column="D_ID" property="dept" select="com.jm.dao.DepartmentDao.getDepartmentByDid"></association>
+		<association column="E_ID" property="employee" select="com.jm.dao.EmployeeDao.getEmployeeByEid"></association>
+	</resultMap>
+	
+	<!-- 获取所有通知公告 -->
+	<select id="getAll" resultMap="NoticeBulletinMap">
+		SELECT * FROM NOTICE_BULLETIN ORDER BY NB_DATE DESC
+	</select>
+	
+	<!-- 首页根据时间显示最新的七条 -->
+	<select id="getNoticeBulletinByDate" resultMap="NoticeBulletinMap">
+		SELECT * FROM NOTICE_BULLETIN ORDER BY NB_DATE DESC LIMIT 0,7
+	</select>
+	
+	<!-- 发布通知公告 -->
+	<insert id="insertNoticeBulletin" parameterType="NoticeBulletin">
+		INSERT IGNORE INTO NOTICE_BULLETIN VALUES(NULL, #{nbTitle}, #{nbContent}, NOW(), #{company.cId}, #{dept.dId}, #{employee.eId})
+	</insert>
+	
+	<!-- 删除通知公告 -->
+	<delete id="delNoticeBulletinById" parameterType="Integer">
+		DELETE FROM NOTICE_BULLETIN WHERE NB_ID = #{nbId}
+	</delete>
+	
+	<!-- 修改通知公告 -->
+	<update id="editNoticeBulletinById" parameterType="NoticeBulletin">
+		UPDATE NOTICE_BULLETIN SET 
+					NB_TITLE = #{nbTitle}, NB_CONTENT = #{nbContent}, 
+					NB_DATE = NOW(), C_ID = #{company.cId}, D_ID = #{dept.dId}, 
+					E_ID = #{employee.eId} WHERE NB_ID = #{nbId}
+	</update>
+	
+</mapper>

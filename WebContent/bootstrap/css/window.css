@@ -1,0 +1,21 @@
+.group{
+	margin: -14px -1px 0px 0px;
+	float: left;
+}
+.jt-group{
+	height: 54px;
+	width:112px;
+	border: none;
+	color: #fff;
+	background: #005395 url(../../assets/images/fgx.png) no-repeat 110px;
+}
+.jt-group:hover,.jt-group:focus{
+	height: 54px;
+	width:112px;
+	background: #019ee1;
+	border: none;
+	border-bottom:3px #f28000 solid;
+	color: #fff;
+	outline:none;
+}
+

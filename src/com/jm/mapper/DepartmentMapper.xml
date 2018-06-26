@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.dao.DepartmentDao">
+	
+	<resultMap type="Department" id="DepartmentMap">
+		<id column="D_ID" property="dId"/>
+		<result column="D_NAME" property="dName"/>
+		<result column="D_ADDRESS" property="dAddress"/>
+		<result column="D_PHONE" property="dPhone"/>
+		<result column="D_HIREDATE" property="dHiredate"/>
+		<association column="C_ID" property="company" select="com.jm.dao.CompanyDao.getCompanyById"></association>
+	</resultMap>
+	
+	<!-- 根据部门编号查询部门记录 -->
+	<select id="getDepartmentByDid" resultMap="DepartmentMap">
+		SELECT * FROM DEPARTMENT WHERE D_ID = #{dId}
+	</select>
+	
+	<select id="getDepartmentByCid" resultType="Department">
+		SELECT * FROM DEPARTMENT WHERE C_ID = #{cId}
+	</select>
+	
+</mapper>

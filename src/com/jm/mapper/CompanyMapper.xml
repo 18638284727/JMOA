@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.dao.CompanyDao">
+	
+	<!-- 根据公司编号查询 -->
+	<select id="getCompanyById" resultType="Company">
+		SELECT * FROM COMPANY WHERE C_ID = #{cId}
+	</select>
+	
+	<!-- 查询所有公司 -->
+	<select id="getAllCompany" resultType="Company">
+		SELECT * FROM COMPANY
+	</select>
+	
+</mapper>
